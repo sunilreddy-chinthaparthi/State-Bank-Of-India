@@ -7,32 +7,32 @@
 // Data
 const account1 = {
   owner: "Chinthaparthi Sunil Reddy ",
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  movements: [200, 4000, -400, 3000, -800, -120, 70, 160],
   interestRate: 1.2, // %
   pin: 1111,
 };
 
 const account2 = {
-  owner: "Anil Magasani",
-  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  owner: "Priya Reddy",
+  movements: [3000, 3400, -150, -800, -3500, -1000, 900, -30],
   interestRate: 1.5,
   pin: 2222,
 };
 
 const account3 = {
   owner: "Sreenivas Kummara ",
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
+  movements: [200, -200, 340, -300, -20, 100, 400, -460],
   interestRate: 0.7,
   pin: 3333,
 };
 
 const account4 = {
   owner: "Sowmya Marrikagari",
-  movements: [430, 1000, 700, 50, 90],
+  movements: [430, 1000, 700, 50, 90, 500],
   interestRate: 1,
   pin: 4444,
 };
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 const accounts = [account1, account2, account3, account4];
 
@@ -82,11 +82,11 @@ const displayMovements = function (movements) {
 ////////////////////////////
 ///////////////////show balance
 ////////////////////////////////////////
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce(function (acc, mov) {
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce(function (acc, mov) {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `${balance} €`;
+  labelBalance.textContent = `${acc.balance} €`;
 };
 
 ///////////////////////
@@ -123,8 +123,18 @@ const createUserNames = function (accs) {
 };
 createUserNames(accounts);
 
+///////////////////////////
+const updateUi = function (acc) {
+  // -----------------------------------------------------display balance
+  calcDisplayBalance(acc);
+  // -----------------------------------------------------display movements
+  displayMovements(acc.movements);
+  //---------------------------------------------------------display summery
+  calcDisplaySummery(acc);
+  // console.log("login");
+};
 // ----------------------------------------------event listerners /////////
-//  IMPLIMENTING LIGIN FUNCTIONALLITY
+//  IMPLIMENTING LOIGIN FUNCTIONALLITY
 
 let currentAccount;
 
@@ -145,15 +155,31 @@ btnLogin.addEventListener("click", function (e) {
     // clear the input fields
     inputLoginUsername.value = inputLoginPin.value = "";
     inputLoginPin.blur();
-    // -----------------------------------------------------display balance
-    calcDisplayBalance(currentAccount.movements);
-    // -----------------------------------------------------display movements
-    displayMovements(currentAccount.movements);
-    //---------------------------------------------------------display summery
-    calcDisplaySummery(currentAccount);
-    // console.log("login");
+    updateUi(currentAccount);
   }
 });
+
+//////////////////////////////transfering money
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const revcieverAcc = accounts.find(
+    (acc) => acc.username === inputTransferTo.value
+  );
+  inputTransferAmount.value = inputTransferTo.value = "";
+  if (
+    amount > 0 &&
+    revcieverAcc &&
+    currentAccount.balance >= amount &&
+    revcieverAcc?.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    revcieverAcc.movements.push(amount);
+    updateUi(currentAccount);
+  }
+});
+
 /////////////////////////////////////////
 //////////////GETTING MAXIMUM VALUE
 // const max = movements.reduce((acc, mov) => {
