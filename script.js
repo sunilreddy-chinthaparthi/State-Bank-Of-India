@@ -196,7 +196,6 @@ const createUserNames = function (accs) {
 };
 createUserNames(accounts);
 
-///////////////////////////
 const updateUi = function (acc) {
   // display balance
   calcDisplayBalance(acc);
@@ -298,7 +297,8 @@ btnClose.addEventListener("click", function (e) {
     );
     accounts.splice(index, 1);
     // console.log(index);
-
+    // change welcome message
+    labelWelcome.textContent = "Log in to get started";
     // hide ui
     containerApp.style.opacity = 0;
   }
