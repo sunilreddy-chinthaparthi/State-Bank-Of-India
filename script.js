@@ -206,10 +206,37 @@ const updateUi = function (acc) {
   // console.log("login");
 };
 
+// setting timeout feature
+const setLogouTimer = function () {
+  const hand = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+
+    // in each call print to ui
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // when is up stop timer and logout user
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = "Log in to get started";
+      containerApp.style.opacity = 0;
+    }
+    // decerease by one sec
+    time--;
+  };
+  // set time to 2 mins
+  let time = 120;
+
+  // call time in every second
+  hand();
+  const timer = setInterval(hand, 1000);
+  return timer;
+};
+
 // event listerners /////////
 
 //  IMPLIMENTING LOIGIN FUNCTIONALLITY
-let currentAccount;
+let currentAccount, timer;
 
 btnLogin.addEventListener("click", function (e) {
   e.preventDefault();
@@ -231,6 +258,10 @@ btnLogin.addEventListener("click", function (e) {
 
     // clear the input fields
     inputLoginUsername.value = inputLoginPin.value = "";
+
+    // timer
+    if (timer) clearInterval(timer);
+    timer = setLogouTimer();
 
     inputLoginPin.blur();
 
@@ -262,6 +293,10 @@ btnTransfer.addEventListener("click", function (e) {
     revcieverAcc.movementsDates.push(new Date().toISOString());
     //updating ui
     updateUi(currentAccount);
+
+    // reset timer
+    clearInterval(timer);
+    timer = setLogouTimer();
   }
 });
 
@@ -274,14 +309,20 @@ btnLoan.addEventListener("click", function (e) {
     amount > 0 &&
     currentAccount.movements.some((mov) => mov >= amount / 10)
   ) {
-    currentAccount.movements.push(amount);
+    // set timeout
+    setTimeout(function () {
+      currentAccount.movements.push(amount);
 
-    // add loan date
-    currentAccount.movementsDates.push(new Date().toISOString());
+      // add loan date
+      currentAccount.movementsDates.push(new Date().toISOString());
 
-    updateUi(currentAccount);
+      updateUi(currentAccount);
+
+      //reset timer
+      clearInterval(timer);
+      timer = setLogouTimer();
+    }, 2500);
   }
-
   inputLoanAmount.value = "";
 });
 
@@ -296,7 +337,6 @@ btnClose.addEventListener("click", function (e) {
       (acc) => acc.username === currentAccount.username
     );
     accounts.splice(index, 1);
-    // console.log(index);
     // change welcome message
     labelWelcome.textContent = "Log in to get started";
     // hide ui
