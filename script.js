@@ -10,6 +10,16 @@ const account1 = {
   movements: [200, 4000, -400, 3000, -800, -120, 70, 160],
   interestRate: 1.2, // %
   pin: 1111,
+  movementsDates: [
+    "2022-02-18T21:31:17.178Z",
+    "2022-03-23T07:42:02.383Z",
+    "2022-04-28T09:15:04.904Z",
+    "2022-05-01T10:17:24.185Z",
+    "2022-06-08T14:11:59.604Z",
+    "2022-07-26T17:01:17.194Z",
+    "2022-09-07T23:36:17.929Z",
+    "2022-09-08T10:51:36.790Z",
+  ],
 };
 
 const account2 = {
@@ -17,6 +27,16 @@ const account2 = {
   movements: [3000, 3400, -150, -800, -3500, -1000, 900, -30],
   interestRate: 1.5,
   pin: 2222,
+  movementsDates: [
+    "2022-02-18T21:31:17.178Z",
+    "2022-03-23T07:42:02.383Z",
+    "2022-04-28T09:15:04.904Z",
+    "2022-05-01T10:17:24.185Z",
+    "2022-06-08T14:11:59.604Z",
+    "2022-07-26T17:01:17.194Z",
+    "2022-09-07T23:36:17.929Z",
+    "2022-09-08T10:51:36.790Z",
+  ],
 };
 
 const account3 = {
@@ -24,6 +44,16 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 100, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  movementsDates: [
+    "2022-02-18T21:31:17.178Z",
+    "2022-03-23T07:42:02.383Z",
+    "2022-04-28T09:15:04.904Z",
+    "2022-05-01T10:17:24.185Z",
+    "2022-06-08T14:11:59.604Z",
+    "2022-07-26T17:01:17.194Z",
+    "2022-09-07T23:36:17.929Z",
+    "2022-09-08T10:51:36.790Z",
+  ],
 };
 
 const account4 = {
@@ -31,6 +61,16 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90, 500],
   interestRate: 1,
   pin: 4444,
+  movementsDates: [
+    "2022-02-18T21:31:17.178Z",
+    "2022-03-23T07:42:02.383Z",
+    "2022-04-28T09:15:04.904Z",
+    "2022-05-01T10:17:24.185Z",
+    "2022-06-08T14:11:59.604Z",
+    "2022-07-26T17:01:17.194Z",
+    "2022-09-07T23:36:17.929Z",
+    "2022-09-08T10:51:36.790Z",
+  ],
 };
 // const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
@@ -61,58 +101,90 @@ const inputTransferAmount = document.querySelector(".form__input--amount");
 const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
+//functions
 
-const displayMovements = function (movements, sort = false) {
+//dates
+const displayloginDate = function () {
+  const now = new Date();
+  const day = `${now.getDate()}`.padStart(2, 0);
+  const month = `${now.getMonth() + 1}`.padStart(2, 0);
+  const year = now.getFullYear();
+  const hour = `${now.getHours()}`.padStart(2, 0);
+  const min = `${now.getMinutes()}`.padStart(2, 0);
+  labelDate.textContent = `${day}/${month}/${year}  , ${
+    hour > 12 ? hour - 12 : hour
+  }:${min}`;
+};
+
+const formateMovementsDates = function (date) {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  const daysPassed = calcDaysPassed(new Date(), date);
+  if (daysPassed === 0) return "Today";
+  if (daysPassed === 1) return "Yesterday";
+  if (daysPassed <= 7) return `${daysPassed} Days ago`;
+
+  const day = `${date.getDate()}`.padStart(2, 0);
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+// movements
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = "";
 
-  const moves = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const moves = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
+
   moves.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
+
+    const date = new Date(acc.movementsDates[i]);
+    const displayDate = formateMovementsDates(date);
 
     const html = `
     <div class="movements__row">
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-      <div class="movements__value">${mov}</div>
+    <div class="movements__date">${displayDate}</div>
+      <div class="movements__value">${mov.toFixed(2)}</div>
     </div>`;
 
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
-////////////////////////////
+
 ///////////////////show balance
-////////////////////////////////////////
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce(function (acc, mov) {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `${acc.balance} €`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}₹`;
 };
 
-///////////////////////
 //----------labal values
-//////////////
 const calcDisplaySummery = function (acc) {
   const incomes = acc.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}€`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}₹`;
   const out = acc.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${out}€`;
+  labelSumOut.textContent = `${out.toFixed(2)}₹`;
 
   const intrest = acc.movements
     .filter((mov) => mov > 0)
     .map((deposit) => (deposit * acc.interestRate) / 100)
     .filter((int, i, arr) => int >= 1)
     .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = `${intrest}€`;
+  labelSumInterest.textContent = `${intrest.toFixed(2)}₹`;
 };
 
 //////////////////////////Genarating usernames
-///////////////////////////////////////////////
 const createUserNames = function (accs) {
   accs.forEach(function (acc) {
     acc.username = acc.owner
@@ -126,17 +198,18 @@ createUserNames(accounts);
 
 ///////////////////////////
 const updateUi = function (acc) {
-  // -----------------------------------------------------display balance
+  // display balance
   calcDisplayBalance(acc);
-  // -----------------------------------------------------display movements
-  displayMovements(acc.movements);
-  //---------------------------------------------------------display summery
+  // display movements
+  displayMovements(acc);
+  // display summery
   calcDisplaySummery(acc);
   // console.log("login");
 };
-// ----------------------------------------------event listerners /////////
-//  IMPLIMENTING LOIGIN FUNCTIONALLITY
 
+// event listerners /////////
+
+//  IMPLIMENTING LOIGIN FUNCTIONALLITY
 let currentAccount;
 
 btnLogin.addEventListener("click", function (e) {
@@ -153,19 +226,25 @@ btnLogin.addEventListener("click", function (e) {
     }`;
 
     containerApp.style.opacity = 100;
+
+    //current date
+    displayloginDate();
+
     // clear the input fields
     inputLoginUsername.value = inputLoginPin.value = "";
+
     inputLoginPin.blur();
+
     updateUi(currentAccount);
   }
 });
 
 //////////////////////////////transfering money
-
 btnTransfer.addEventListener("click", function (e) {
   e.preventDefault();
 
-  const amount = Number(inputTransferAmount.value);
+  const amount = Math.floor(inputTransferAmount.value);
+
   const revcieverAcc = accounts.find(
     (acc) => acc.username === inputTransferTo.value
   );
@@ -178,11 +257,16 @@ btnTransfer.addEventListener("click", function (e) {
   ) {
     currentAccount.movements.push(-amount);
     revcieverAcc.movements.push(amount);
+
+    // add tranfer date
+    currentAccount.movementsDates.push(new Date().toISOString());
+    revcieverAcc.movementsDates.push(new Date().toISOString());
+    //updating ui
     updateUi(currentAccount);
   }
 });
 
-/////////////////-----------------REQUESTING MONEY FROM BANK
+//REQUESTING LOAN FROM BANK
 btnLoan.addEventListener("click", function (e) {
   e.preventDefault();
   const amount = Number(inputLoanAmount.value);
@@ -192,12 +276,17 @@ btnLoan.addEventListener("click", function (e) {
     currentAccount.movements.some((mov) => mov >= amount / 10)
   ) {
     currentAccount.movements.push(amount);
+
+    // add loan date
+    currentAccount.movementsDates.push(new Date().toISOString());
+
     updateUi(currentAccount);
   }
+
   inputLoanAmount.value = "";
 });
 
-///////////////////////////////deleting account
+//deleting account
 btnClose.addEventListener("click", function (e) {
   e.preventDefault();
   if (
@@ -223,7 +312,6 @@ btnSort.addEventListener("click", function (e) {
   sortMov = !sortMov;
 });
 
-/////////////////////////////////////////
 //////////////GETTING MAXIMUM VALUE
 // const max = movements.reduce((acc, mov) => {
 //   if (acc > mov) return acc;
